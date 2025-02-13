@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>  
 <html lang="en">  
 <head>  
@@ -34,12 +35,12 @@
         .loading {  
             color: yellow; /* Loading text color */  
         }  
-        .highest-start-price {  
-            background-color: green; /* Highlight for the highest starting price */  
+        .highest-price {  
+            background-color: green; /* Highlight for highest price */  
             color: white;  
         }  
-        .lowest-start-price {  
-            background-color: red; /* Highlight for the lowest starting price */  
+        .lowest-price {  
+            background-color: red; /* Highlight for lowest price */  
             color: white;  
         }  
     </style>  
@@ -169,15 +170,12 @@
 
                 const data = await response.json();  
                 
-                // Define starting prices  
-                const startingPrices = {  
-                    wbtc: [40000.00, 40200.00, 39800.00, 39950.00],  
-                    weth: [3000.00, 3050.00, 2950.00, 2980.00],  
-                    shib: [0.00001, 0.000012, 0.000009, 0.000011],  
-                    matic: [1.50, 1.55, 1.45, 1.48]  
-                };  
-
-                // Status of current prices  
+                // Array for current prices across all DEXes  
+                let wbtcPrices = [];  
+                let wethPrices = [];  
+                let shibPrices = [];  
+                let maticPrices = [];  
+                
                 const prices = {  
                     wbtc: {  
                         sushi: Number(data.wbtc.usd),  
@@ -205,7 +203,7 @@
                     }  
                 };  
 
-                // Assign current prices to cells  
+                // Assign prices to cells  
                 document.getElementById('wbtc-sushi').innerText = `$${prices.wbtc.sushi.toFixed(2)}`;  
                 document.getElementById('wbtc-quickswap').innerText = `$${prices.wbtc.quickswap.toFixed(2)}`;  
                 document.getElementById('wbtc-uniswap').innerText = `$${prices.wbtc.uniswap.toFixed(2)}`;  
@@ -226,20 +224,19 @@
                 document.getElementById('matic-uniswap').innerText = `$${prices.matic.uniswap.toFixed(2)}`;  
                 document.getElementById('matic-balancer').innerText = `$${prices.matic.balancer.toFixed(2)}`;  
 
-                // Find highest and lowest starting prices and apply styles  
-                Object.keys(startingPrices).forEach(token => {  
-                    const priceArray = startingPrices[token];  
-
+                // Find highest and lowest prices for each token and apply styles  
+                Object.keys(prices).forEach(token => {  
+                    const priceArray = Object.values(prices[token]);  
                     const highest = Math.max(...priceArray);  
                     const lowest = Math.min(...priceArray);  
 
-                    priceArray.forEach((price, index) => {  
-                        const row = document.querySelectorAll(`tr:nth-child(${index + 2}) td:nth-child(3)`); // Get the 3rd column (Starting Price)  
-                        if (price === highest) {  
-                            row.forEach(cell => cell.classList.add('highest-start-price'));  
+                    Object.keys(prices[token]).forEach(DEX => {  
+                        const priceCell = document.getElementById(`${token}-${DEX}`);  
+                        if (priceArray[DEX] === highest) {  
+                            priceCell.classList.add('highest-price');  
                         }  
-                        if (price === lowest) {  
-                            row.forEach(cell => cell.classList.add('lowest-start-price'));  
+                        if (priceArray[DEX] === lowest) {  
+                            priceCell.classList.add('lowest-price');  
                         }  
                     });  
                 });  
