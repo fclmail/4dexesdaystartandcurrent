@@ -1,0 +1,270 @@
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Live Token Prices on Polygon</title>  
+    <style>  
+        body {  
+            background-color: #001f3f; /* Dark blue background */  
+            color: white; /* White text for contrast */  
+            font-family: Arial, sans-serif; /* Font style */  
+            margin: 0;  
+            padding: 20px;  
+        }  
+        h1 {  
+            margin-bottom: 20px; /* Space below heading */  
+        }  
+        #datetime {  
+            font-size: 18px; /* Font size for date and time */  
+            margin-bottom: 20px; /* Space below date and time */  
+        }  
+        table {  
+            width: 100%; /* Full width table */  
+            border-collapse: collapse; /* Remove space between cells */  
+        }  
+        th, td {  
+            border: 1px solid #fff; /* White border for table cells */  
+            padding: 10px; /* Padding inside cells */  
+            text-align: center; /* Center-align text */  
+        }  
+        th {  
+            background-color: #0074D9; /* Header background color */  
+        }  
+        .loading {  
+            color: yellow; /* Loading text color */  
+        }  
+        .highest-start-price {  
+            background-color: green; /* Highlight for the highest starting price */  
+            color: white;  
+        }  
+        .lowest-start-price {  
+            background-color: red; /* Highlight for the lowest starting price */  
+            color: white;  
+        }  
+    </style>  
+</head>  
+<body>  
+    <h1>Live Token Prices on Polygon</h1>  
+    <div id="datetime"></div>  
+
+    <table>  
+        <thead>  
+            <tr>  
+                <th>Token</th>  
+                <th>DEX</th>  
+                <th>Starting Price (4 Days Ago)</th>  
+                <th>Current Price</th>  
+            </tr>  
+        </thead>  
+        <tbody>  
+            <tr>  
+                <td>WBTC</td>  
+                <td>SushiSwap</td>  
+                <td>$40,000.00</td>  
+                <td id="wbtc-sushi" class="loading">Fetching price...</td>  
+            </tr>  
+            <tr>  
+                <td>WBTC</td>  
+                <td>QuickSwap</td>  
+                <td>$40,200.00</td>  
+                <td id="wbtc-quickswap" class="loading">Fetching price...</td>  
+            </tr>  
+            <tr>  
+                <td>WBTC</td>  
+                <td>Uniswap</td>  
+                <td>$39,800.00</td>  
+                <td id="wbtc-uniswap" class="loading">Fetching price...</td>  
+            </tr>  
+            <tr>  
+                <td>WBTC</td>  
+                <td>Balancer</td>  
+                <td>$39,950.00</td>  
+                <td id="wbtc-balancer" class="loading">Fetching price...</td>  
+            </tr>  
+            <tr>  
+                <td>WETH</td>  
+                <td>SushiSwap</td>  
+                <td>$3,000.00</td>  
+                <td id="weth-sushi" class="loading">Fetching price...</td>  
+            </tr>  
+            <tr>  
+                <td>WETH</td>  
+                <td>QuickSwap</td>  
+                <td>$3,050.00</td>  
+                <td id="weth-quickswap" class="loading">Fetching price...</td>  
+            </tr>  
+            <tr>  
+                <td>WETH</td>  
+                <td>Uniswap</td>  
+                <td>$2,950.00</td>  
+                <td id="weth-uniswap" class="loading">Fetching price...</td>  
+            </tr>  
+            <tr>  
+                <td>WETH</td>  
+                <td>Balancer</td>  
+                <td>$2,980.00</td>  
+                <td id="weth-balancer" class="loading">Fetching price...</td>  
+            </tr>  
+            <tr>  
+                <td>SHIB</td>  
+                <td>SushiSwap</td>  
+                <td>$0.00001</td>  
+                <td id="shib-sushi" class="loading">Fetching price...</td>  
+            </tr>  
+            <tr>  
+                <td>SHIB</td>  
+                <td>QuickSwap</td>  
+                <td>$0.000012</td>  
+                <td id="shib-quickswap" class="loading">Fetching price...</td>  
+            </tr>  
+            <tr>  
+                <td>SHIB</td>  
+                <td>Uniswap</td>  
+                <td>$0.000009</td>  
+                <td id="shib-uniswap" class="loading">Fetching price...</td>  
+            </tr>  
+            <tr>  
+                <td>SHIB</td>  
+                <td>Balancer</td>  
+                <td>$0.000011</td>  
+                <td id="shib-balancer" class="loading">Fetching price...</td>  
+            </tr>  
+            <tr>  
+                <td>MATIC</td>  
+                <td>SushiSwap</td>  
+                <td>$1.50</td>  
+                <td id="matic-sushi" class="loading">Fetching price...</td>  
+            </tr>  
+            <tr>  
+                <td>MATIC</td>  
+                <td>QuickSwap</td>  
+                <td>$1.55</td>  
+                <td id="matic-quickswap" class="loading">Fetching price...</td>  
+            </tr>  
+            <tr>  
+                <td>MATIC</td>  
+                <td>Uniswap</td>  
+                <td>$1.45</td>  
+                <td id="matic-uniswap" class="loading">Fetching price...</td>  
+            </tr>  
+            <tr>  
+                <td>MATIC</td>  
+                <td>Balancer</td>  
+                <td>$1.48</td>  
+                <td id="matic-balancer" class="loading">Fetching price...</td>  
+            </tr>  
+        </tbody>  
+    </table>  
+
+    <script>  
+        const fetchPrices = async () => {  
+            const url = 'https://api.coingecko.com/api/v3/simple/price?ids=wbtc,weth,shiba-inu,matic-network&vs_currencies=usd';  
+
+            try {  
+                const response = await fetch(url);  
+                if (!response.ok) {  
+                    throw new Error('Network response was not ok');  
+                }  
+
+                const data = await response.json();  
+                
+                // Define starting prices  
+                const startingPrices = {  
+                    wbtc: [40000.00, 40200.00, 39800.00, 39950.00],  
+                    weth: [3000.00, 3050.00, 2950.00, 2980.00],  
+                    shib: [0.00001, 0.000012, 0.000009, 0.000011],  
+                    matic: [1.50, 1.55, 1.45, 1.48]  
+                };  
+
+                // Status of current prices  
+                const prices = {  
+                    wbtc: {  
+                        sushi: Number(data.wbtc.usd),  
+                        quickswap: Number(data.wbtc.usd),  
+                        uniswap: Number(data.wbtc.usd),  
+                        balancer: Number(data.wbtc.usd),  
+                    },  
+                    weth: {  
+                        sushi: Number(data.weth.usd),  
+                        quickswap: Number(data.weth.usd),  
+                        uniswap: Number(data.weth.usd),  
+                        balancer: Number(data.weth.usd),  
+                    },  
+                    shib: {  
+                        sushi: Number(data['shiba-inu'].usd),  
+                        quickswap: Number(data['shiba-inu'].usd),  
+                        uniswap: Number(data['shiba-inu'].usd),  
+                        balancer: Number(data['shiba-inu'].usd),  
+                    },  
+                    matic: {  
+                        sushi: Number(data['matic-network'].usd),  
+                        quickswap: Number(data['matic-network'].usd),  
+                        uniswap: Number(data['matic-network'].usd),  
+                        balancer: Number(data['matic-network'].usd),  
+                    }  
+                };  
+
+                // Assign current prices to cells  
+                document.getElementById('wbtc-sushi').innerText = `$${prices.wbtc.sushi.toFixed(2)}`;  
+                document.getElementById('wbtc-quickswap').innerText = `$${prices.wbtc.quickswap.toFixed(2)}`;  
+                document.getElementById('wbtc-uniswap').innerText = `$${prices.wbtc.uniswap.toFixed(2)}`;  
+                document.getElementById('wbtc-balancer').innerText = `$${prices.wbtc.balancer.toFixed(2)}`;  
+
+                document.getElementById('weth-sushi').innerText = `$${prices.weth.sushi.toFixed(2)}`;  
+                document.getElementById('weth-quickswap').innerText = `$${prices.weth.quickswap.toFixed(2)}`;  
+                document.getElementById('weth-uniswap').innerText = `$${prices.weth.uniswap.toFixed(2)}`;  
+                document.getElementById('weth-balancer').innerText = `$${prices.weth.balancer.toFixed(2)}`;  
+
+                document.getElementById('shib-sushi').innerText = `$${prices.shib.sushi.toFixed(7)}`;  
+                document.getElementById('shib-quickswap').innerText = `$${prices.shib.quickswap.toFixed(7)}`;  
+                document.getElementById('shib-uniswap').innerText = `$${prices.shib.uniswap.toFixed(7)}`;  
+                document.getElementById('shib-balancer').innerText = `$${prices.shib.balancer.toFixed(7)}`;  
+
+                document.getElementById('matic-sushi').innerText = `$${prices.matic.sushi.toFixed(2)}`;  
+                document.getElementById('matic-quickswap').innerText = `$${prices.matic.quickswap.toFixed(2)}`;  
+                document.getElementById('matic-uniswap').innerText = `$${prices.matic.uniswap.toFixed(2)}`;  
+                document.getElementById('matic-balancer').innerText = `$${prices.matic.balancer.toFixed(2)}`;  
+
+                // Find highest and lowest starting prices and apply styles  
+                Object.keys(startingPrices).forEach(token => {  
+                    const priceArray = startingPrices[token];  
+
+                    const highest = Math.max(...priceArray);  
+                    const lowest = Math.min(...priceArray);  
+
+                    priceArray.forEach((price, index) => {  
+                        const row = document.querySelectorAll(`tr:nth-child(${index + 2}) td:nth-child(3)`); // Get the 3rd column (Starting Price)  
+                        if (price === highest) {  
+                            row.forEach(cell => cell.classList.add('highest-start-price'));  
+                        }  
+                        if (price === lowest) {  
+                            row.forEach(cell => cell.classList.add('lowest-start-price'));  
+                        }  
+                    });  
+                });  
+                
+            } catch (error) {  
+                console.error("Error fetching prices:", error);  
+                document.querySelectorAll('td.loading').forEach(td => {  
+                    td.innerText = "Error fetching price.";  
+                });  
+            }  
+        };  
+
+        const updateDateTime = () => {  
+            const now = new Date();  
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };  
+            const formattedDate = now.toLocaleDateString('en-US', options);  
+            document.getElementById('datetime').innerText = `Current Date and Time: ${formattedDate}`;  
+        };  
+
+        // Fetch prices and update time on page load  
+        fetchPrices();  
+        updateDateTime();  
+
+        // Update the time every second  
+        setInterval(updateDateTime, 1000);  
+    </script>  
+</body>  
+</html>
